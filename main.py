@@ -8,7 +8,7 @@ from typing import List, Coroutine
 from curses_tools import draw_frame, read_controls, get_frame_size
 
 
-def run_coroutines(coroutines: List[Coroutine], tic_timeout=0.):
+def run_coroutines(coroutines: List[Coroutine], canvas, tic_timeout=0.):
     while True:
         for coroutine in coroutines:
             try:
@@ -17,6 +17,7 @@ def run_coroutines(coroutines: List[Coroutine], tic_timeout=0.):
                 coroutines.remove(coroutine)
         if len(coroutines) == 0:
             break
+        canvas.refresh()
         time.sleep(tic_timeout)
 
 
@@ -100,7 +101,6 @@ async def ship(canvas, row, column, frames):
                 column -= 1
 
             draw_frame(canvas, row, column, frame)
-            canvas.refresh()
             await asyncio.sleep(0)
             draw_frame(canvas, row, column, frame, negative=True)
 
@@ -167,7 +167,7 @@ def draw(canvas):
     )
 
     tic_timeout = .1
-    run_coroutines(coroutines, tic_timeout)
+    run_coroutines(coroutines, canvas, tic_timeout)
 
 
 if __name__ == '__main__':
