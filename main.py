@@ -18,23 +18,27 @@ def run_coroutines(coroutines: List[Coroutine], canvas, delay=0.):
         time.sleep(delay)
 
 
-async def blink(canvas, row, column, symbol='*'):
+async def blink(canvas, row, column, symbol='*', start_step=0):
     while True:
-        canvas.addstr(row, column, symbol, curses.A_DIM)
-        for _ in range(20):
-            await asyncio.sleep(0)
+        if start_step <= 1:
+            canvas.addstr(row, column, symbol, curses.A_DIM)
+            for _ in range(20):
+                await asyncio.sleep(0)
+
+        if start_step <= 2:
+            canvas.addstr(row, column, symbol)
+            for _ in range(3):
+                await asyncio.sleep(0)
+
+        if start_step <= 3:
+            canvas.addstr(row, column, symbol, curses.A_BOLD)
+            for _ in range(5):
+                await asyncio.sleep(0)
 
         canvas.addstr(row, column, symbol)
         for _ in range(3):
             await asyncio.sleep(0)
-
-        canvas.addstr(row, column, symbol, curses.A_BOLD)
-        for _ in range(5):
-            await asyncio.sleep(0)
-
-        canvas.addstr(row, column, symbol)
-        for _ in range(3):
-            await asyncio.sleep(0)
+        start_step = 0
 
 
 def draw(canvas):
@@ -45,19 +49,22 @@ def draw(canvas):
     canvas.refresh()
     min_row, min_col = (1, 1)
     max_row, max_col = canvas.getmaxyx()
-    max_row -= 2
-    max_col -= 2
+    canvas_padding = 2
+    max_row -= canvas_padding
+    max_col -= canvas_padding
 
     symbols = list('+*.:')
 
     coroutines: List[Coroutine] = []
     stars_count = 135
     for _ in range(stars_count):
+        start_step = randint(1, 4)
         coroutines.append(blink(
             canvas,
             randint(min_row, max_row),
             randint(min_col, max_col),
-            choice(symbols)
+            choice(symbols),
+            start_step
         ))
 
     tic_timeout = .1
