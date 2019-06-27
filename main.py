@@ -4,6 +4,7 @@ import curses
 
 def draw(canvas):
     row, column = (5, 20)
+    canvas.border()
     canvas.addstr(row, column, 'Hello, World!')
     canvas.refresh()
     time.sleep(1)
