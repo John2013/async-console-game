@@ -5,7 +5,7 @@ from random import randint, choice
 from typing import List, Coroutine
 
 
-def run_coroutines(coroutines: List[Coroutine], canvas, delay=0.):
+def run_coroutines(coroutines: List[Coroutine], canvas, tic_timeout=0.):
     while True:
         for coroutine in coroutines:
             try:
@@ -15,7 +15,7 @@ def run_coroutines(coroutines: List[Coroutine], canvas, delay=0.):
                 coroutines.remove(coroutine)
         if len(coroutines) == 0:
             break
-        time.sleep(delay)
+        time.sleep(tic_timeout)
 
 
 async def blink(canvas, row, column, symbol='*', start_step=0):
@@ -39,6 +39,37 @@ async def blink(canvas, row, column, symbol='*', start_step=0):
         for _ in range(3):
             await asyncio.sleep(0)
         start_step = 0
+
+
+async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0):
+    """Display animation of gun shot. Direction and speed can be specified."""
+
+    row, column = start_row, start_column
+
+    canvas.addstr(round(row), round(column), '*')
+    await asyncio.sleep(0)
+
+    canvas.addstr(round(row), round(column), 'O')
+    await asyncio.sleep(0)
+    canvas.addstr(round(row), round(column), ' ')
+
+    row += rows_speed
+    column += columns_speed
+
+    symbol = '-' if columns_speed else '|'
+
+    rows, columns = canvas.getmaxyx()
+    max_row, max_column = rows - 2, columns - 2
+    min_row, min_col = 1, 1
+
+    curses.beep()
+
+    while min_row < row < max_row and min_col < column < max_column:
+        canvas.addstr(round(row), round(column), symbol)
+        await asyncio.sleep(0)
+        canvas.addstr(round(row), round(column), ' ')
+        row += rows_speed
+        column += columns_speed
 
 
 def draw(canvas):
@@ -66,6 +97,13 @@ def draw(canvas):
             choice(symbols),
             start_step
         ))
+
+    fire_row = int(round((max_row - min_row) / 2))
+    fire_col = int(round((max_col - min_col) / 2))
+
+    coroutines.append(
+        fire(canvas, fire_row, fire_col)
+    )
 
     tic_timeout = .1
     run_coroutines(coroutines, canvas, tic_timeout)
