@@ -95,6 +95,13 @@ def get_frames(path):
     return frames
 
 
+def get_random_coords(min_row, max_row, min_col, max_col):
+    return (
+        randint(min_row, max_row),
+        randint(min_col, max_col),
+    )
+
+
 def draw(canvas):
     row, column = (5, 20)
     curses.curs_set(False)
@@ -111,16 +118,24 @@ def draw(canvas):
     symbols = list('+*.:')
 
     coroutines: List[Coroutine] = []
+    stars_coords = []
     stars_count = 200
+
     for _ in range(stars_count):
         start_step = randint(1, 4)
+        new_coords = get_random_coords(min_row, max_row, min_col, max_col)
+        while new_coords in stars_coords:
+            new_coords = get_random_coords(min_row, max_row, min_col, max_col)
+
         coroutines.append(blink(
             canvas,
-            randint(min_row, max_row),
-            randint(min_col, max_col),
+            *new_coords,
             choice(symbols),
             start_step
         ))
+        stars_coords.append(new_coords)
+
+    del stars_coords
 
     center_row = int(round((max_row - min_row) / 2))
     center_col = int(round((max_col - min_col) / 2))
