@@ -1,6 +1,7 @@
 import asyncio
 import time
 import curses
+from random import randint, choice
 from typing import List, Coroutine
 
 
@@ -42,30 +43,25 @@ def draw(canvas):
     canvas.border()
     canvas.addstr(row, column, 'Hello, World!')
     canvas.refresh()
-    row, column = (3, 7)
-    margin = 1
+    min_row, min_col = (1, 1)
+    max_row, max_col = canvas.getmaxyx()
+    max_row -= 2
+    max_col -= 2
+
+    symbols = list('+*.:')
+
     coroutines: List[Coroutine] = []
-    for star_number in range(5):
-        current_column = column + star_number + margin * star_number
-        coroutines.append(blink(canvas, row, current_column))
+    stars_count = 135
+    for _ in range(stars_count):
+        coroutines.append(blink(
+            canvas,
+            randint(min_row, max_row),
+            randint(min_col, max_col),
+            choice(symbols)
+        ))
 
     tic_timeout = .1
     run_coroutines(coroutines, canvas, tic_timeout)
-    # while True:
-    #     canvas.refresh()
-    #     row, column = (3, 7)
-    #     canvas.addstr(row, column, '*', curses.A_DIM)
-    #     canvas.refresh()
-    #     time.sleep(2.)
-    #     canvas.addstr(row, column, '*', curses.A_NORMAL)
-    #     canvas.refresh()
-    #     time.sleep(.3)
-    #     canvas.addstr(row, column, '*', curses.A_BOLD)
-    #     canvas.refresh()
-    #     time.sleep(.5)
-    #     canvas.addstr(row, column, '*', curses.A_NORMAL)
-    #     canvas.refresh()
-    #     time.sleep(.3)
 
 
 if __name__ == '__main__':
