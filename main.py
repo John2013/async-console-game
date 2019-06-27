@@ -26,9 +26,10 @@ def draw(canvas):
     canvas.refresh()
     row, column = (3, 7)
     corutine = blink(canvas, row, column)
-    corutine.send(None)
-    canvas.refresh()
-    time.sleep(12)
+    while True:
+        corutine.send(None)
+        canvas.refresh()
+        time.sleep(1)
     # while True:
     #     canvas.refresh()
     #     row, column = (3, 7)
