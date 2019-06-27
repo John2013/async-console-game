@@ -5,7 +5,7 @@ import curses
 from random import randint, choice
 from typing import List, Coroutine
 
-from curses_tools import draw_frame
+from curses_tools import draw_frame, read_controls
 
 
 def run_coroutines(coroutines: List[Coroutine], tic_timeout=0.):
@@ -77,6 +77,9 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
 async def ship(canvas, row, column, frames):
     while True:
         for frame in frames:
+            rows_direction, columns_direction, space_pressed = read_controls(canvas)
+            row += rows_direction
+            column += columns_direction
             draw_frame(canvas, row, column, frame)
             canvas.refresh()
             await asyncio.sleep(0)
@@ -96,6 +99,7 @@ def draw(canvas):
     row, column = (5, 20)
     curses.curs_set(False)
     canvas.border()
+    canvas.nodelay(True)
     canvas.addstr(row, column, 'Hello, World!')
     canvas.refresh()
     min_row, min_col = (1, 1)
@@ -107,7 +111,7 @@ def draw(canvas):
     symbols = list('+*.:')
 
     coroutines: List[Coroutine] = []
-    stars_count = 150
+    stars_count = 200
     for _ in range(stars_count):
         start_step = randint(1, 4)
         coroutines.append(blink(

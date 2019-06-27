@@ -45,15 +45,20 @@ def draw_frame(canvas, start_row, start_column, text, negative=False):
 
     rows_number, columns_number = canvas.getmaxyx()
 
+    top_left_padding = 1
+    bottom_right_padding = 2
+    rows_number -= bottom_right_padding
+    columns_number -= bottom_right_padding
+
     for row, line in enumerate(text.splitlines(), round(start_row)):
-        if row < 0:
+        if row < top_left_padding:
             continue
 
         if row >= rows_number:
             break
 
         for column, symbol in enumerate(line, round(start_column)):
-            if column < 0:
+            if column < top_left_padding:
                 continue
 
             if column >= columns_number:
