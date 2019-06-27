@@ -1,6 +1,20 @@
 import asyncio
 import time
 import curses
+from typing import List, Coroutine
+
+
+def run_coroutines(coroutines: List[Coroutine], canvas, delay=0.):
+    while True:
+        for coroutine in coroutines:
+            try:
+                coroutine.send(None)
+                canvas.refresh()
+            except StopIteration:
+                coroutines.remove(coroutine)
+        if len(coroutines) == 0:
+            break
+        time.sleep(delay)
 
 
 async def blink(canvas, row, column, symbol='*'):
@@ -25,11 +39,13 @@ def draw(canvas):
     canvas.addstr(row, column, 'Hello, World!')
     canvas.refresh()
     row, column = (3, 7)
-    corutine = blink(canvas, row, column)
-    while True:
-        corutine.send(None)
-        canvas.refresh()
-        time.sleep(1)
+    margin = 1
+    coroutines: List[Coroutine] = []
+    for star_number in range(5):
+        current_column = column + star_number + margin * star_number
+        coroutines.append(blink(canvas, row, current_column))
+
+    run_coroutines(coroutines, canvas, 1)
     # while True:
     #     canvas.refresh()
     #     row, column = (3, 7)
