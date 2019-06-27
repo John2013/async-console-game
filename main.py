@@ -5,7 +5,7 @@ import curses
 from random import randint, choice
 from typing import List, Coroutine
 
-from curses_tools import draw_frame, read_controls
+from curses_tools import draw_frame, read_controls, get_frame_size
 
 
 def run_coroutines(coroutines: List[Coroutine], tic_timeout=0.):
@@ -75,11 +75,30 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
 
 
 async def ship(canvas, row, column, frames):
+    min_row, min_col = (1, 1)
+    max_row, max_col = canvas.getmaxyx()
+    canvas_padding = 1
+    max_row -= canvas_padding
+    max_col -= canvas_padding
     while True:
         for frame in frames:
             rows_direction, columns_direction, space_pressed = read_controls(canvas)
             row += rows_direction
             column += columns_direction
+
+            if row < min_row:
+                row += 1
+            if column < min_col:
+                column += 1
+
+            rows, cols = get_frame_size(frame)
+
+            if row + rows > max_row:
+                row -= 1
+
+            if column + cols > max_col:
+                column -= 1
+
             draw_frame(canvas, row, column, frame)
             canvas.refresh()
             await asyncio.sleep(0)
