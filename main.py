@@ -122,11 +122,9 @@ def get_random_coords(min_row, max_row, min_col, max_col):
 
 
 def draw(canvas):
-    row, column = (5, 20)
     curses.curs_set(False)
     canvas.border()
     canvas.nodelay(True)
-    canvas.addstr(row, column, 'Hello, World!')
     canvas.refresh()
     min_row, min_col = (1, 1)
     max_row, max_col = canvas.getmaxyx()
