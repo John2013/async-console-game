@@ -1,16 +1,18 @@
 import asyncio
+import os
 import time
 import curses
 from random import randint, choice
 from typing import List, Coroutine
 
+from curses_tools import draw_frame
 
-def run_coroutines(coroutines: List[Coroutine], canvas, tic_timeout=0.):
+
+def run_coroutines(coroutines: List[Coroutine], tic_timeout=0.):
     while True:
         for coroutine in coroutines:
             try:
                 coroutine.send(None)
-                canvas.refresh()
             except StopIteration:
                 coroutines.remove(coroutine)
         if len(coroutines) == 0:
@@ -72,6 +74,24 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
         column += columns_speed
 
 
+async def ship(canvas, row, column, frames):
+    while True:
+        for frame in frames:
+            draw_frame(canvas, row, column, frame)
+            canvas.refresh()
+            await asyncio.sleep(0)
+            draw_frame(canvas, row, column, frame, negative=True)
+
+
+def get_frames(path):
+    frames = []
+    for filename in os.listdir(path):
+        filepath = os.path.join(path, filename)
+        with open(filepath, 'r') as file:
+            frames.append(file.read())
+    return frames
+
+
 def draw(canvas):
     row, column = (5, 20)
     curses.curs_set(False)
@@ -87,7 +107,7 @@ def draw(canvas):
     symbols = list('+*.:')
 
     coroutines: List[Coroutine] = []
-    stars_count = 135
+    stars_count = 150
     for _ in range(stars_count):
         start_step = randint(1, 4)
         coroutines.append(blink(
@@ -98,15 +118,20 @@ def draw(canvas):
             start_step
         ))
 
-    fire_row = int(round((max_row - min_row) / 2))
-    fire_col = int(round((max_col - min_col) / 2))
+    center_row = int(round((max_row - min_row) / 2))
+    center_col = int(round((max_col - min_col) / 2))
 
     coroutines.append(
-        fire(canvas, fire_row, fire_col)
+        fire(canvas, center_row, center_col)
+    )
+
+    ship_frames = get_frames('./ship')
+    coroutines.append(
+        ship(canvas, center_row - 1, center_col - 2, ship_frames)
     )
 
     tic_timeout = .1
-    run_coroutines(coroutines, canvas, tic_timeout)
+    run_coroutines(coroutines, tic_timeout)
 
 
 if __name__ == '__main__':
