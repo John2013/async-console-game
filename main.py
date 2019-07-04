@@ -32,26 +32,27 @@ def get_playground_border(canvas):
     return min_row, min_col, max_row, max_col
 
 
+async def sleep(tics=1):
+    for _ in range(tics):
+        await asyncio.sleep(0)
+
+
 async def blink(canvas, row, column, symbol='*', start_step=0):
     while True:
         if start_step <= 1:
             canvas.addstr(row, column, symbol, curses.A_DIM)
-            for _ in range(20):
-                await asyncio.sleep(0)
+            await sleep(20)
 
         if start_step <= 2:
             canvas.addstr(row, column, symbol)
-            for _ in range(3):
-                await asyncio.sleep(0)
+            await sleep(3)
 
         if start_step <= 3:
             canvas.addstr(row, column, symbol, curses.A_BOLD)
-            for _ in range(5):
-                await asyncio.sleep(0)
+            await sleep(5)
 
         canvas.addstr(row, column, symbol)
-        for _ in range(3):
-            await asyncio.sleep(0)
+        await sleep(3)
         start_step = 0
 
 
@@ -129,7 +130,7 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
         row += speed
 
 
-async def fill_orbit_with_garbage(canvas, tens_milliseconds_timeout: int=5):
+async def fill_orbit_with_garbage(canvas, tics_timeout: int = 5):
     garbage_frames = get_frames('./garbage')
 
     min_row, min_col, max_row, max_col = get_playground_border(canvas)
@@ -139,8 +140,7 @@ async def fill_orbit_with_garbage(canvas, tens_milliseconds_timeout: int=5):
         frame = choice(garbage_frames)
 
         coroutines.append(fly_garbage(canvas, column, frame))
-        for _ in range(tens_milliseconds_timeout):
-            await asyncio.sleep(0)
+        await sleep(tics_timeout)
 
 
 def get_frames(path):
