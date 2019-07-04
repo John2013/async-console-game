@@ -105,6 +105,25 @@ async def ship(canvas, row, column, frames):
             draw_frame(canvas, row, column, frame, negative=True)
 
 
+async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
+    """
+    Animate garbage, flying from top to bottom.
+    Column position will stay same, as specified on start.
+    """
+    rows_number, columns_number = canvas.getmaxyx()
+
+    column = max(column, 0)
+    column = min(column, columns_number - 1)
+
+    row = 0
+
+    while row < rows_number:
+        draw_frame(canvas, row, column, garbage_frame)
+        await asyncio.sleep(0)
+        draw_frame(canvas, row, column, garbage_frame, negative=True)
+        row += speed
+
+
 def get_frames(path):
     frames = []
     for filename in os.listdir(path):
@@ -165,6 +184,9 @@ def draw(canvas):
     coroutines.append(
         ship(canvas, center_row - 1, center_col - 2, ship_frames)
     )
+
+    garbage_frames = get_frames('./garbage')
+    coroutines.append(fly_garbage(canvas, 10, garbage_frames[0]))
 
     tic_timeout = .1
     run_coroutines(coroutines, canvas, tic_timeout)
