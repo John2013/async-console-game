@@ -38,19 +38,21 @@ def get_playground_limits(canvas):
     return min_row, min_col, max_row, max_col
 
 
-def show_game_over(canvas):
-    frame = get_frames('./gameover')[0]
-    rows, cols = get_frame_size(frame)
+async def show_game_over(canvas):
+    while True:
+        frame = get_frames('./gameover')[0]
+        rows, cols = get_frame_size(frame)
 
-    min_row, min_col, max_row, max_col = get_playground_limits(canvas)
+        min_row, min_col, max_row, max_col = get_playground_limits(canvas)
 
-    width = max_col - min_col
-    height = max_row - min_row
+        width = max_col - min_col
+        height = max_row - min_row
 
-    frame_row = round((height - rows) / 2) + min_row
-    frame_col = round((width - cols) / 2) + min_col
+        frame_row = round((height - rows) / 2) + min_row
+        frame_col = round((width - cols) / 2) + min_col
 
-    draw_frame(canvas, frame_row, frame_col, frame)
+        draw_frame(canvas, frame_row, frame_col, frame)
+        await asyncio.sleep(0)
 
 
 async def sleep(tics=1):
@@ -151,7 +153,7 @@ async def run_spaceship(canvas, row, column, frames):
             )
         for obstacle in obstacles:
             if obstacle.has_collision(row, column, rows, cols):
-                show_game_over(canvas)
+                await show_game_over(canvas)
                 return
 
         frame = frames[spaceship_frame_number]
