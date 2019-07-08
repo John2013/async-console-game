@@ -90,6 +90,10 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
 async def run_spaceship(canvas, row, column, frames):
     min_row, min_col, max_row, max_col = get_playground_limits(canvas)
     row_speed = column_speed = 0
+    shoot_top = -1
+    shoot_left = 2
+
+    shoot_base_row_speed = - .3
     while True:
         rows_direction, columns_direction, space_pressed = read_controls(canvas)
         row_speed, column_speed = update_speed(row_speed, column_speed, rows_direction,
@@ -109,6 +113,19 @@ async def run_spaceship(canvas, row, column, frames):
 
         if column + cols > max_col:
             column -= 1
+
+        if space_pressed:
+            shoot_row_speed = shoot_base_row_speed
+            if row_speed < 0:
+                shoot_row_speed += row_speed
+            coroutines.append(
+                fire(
+                    canvas,
+                    row + shoot_top,
+                    column + shoot_left,
+                    shoot_row_speed
+                )
+            )
 
         frame = frames[spaceship_frame_number]
         draw_frame(canvas, row, column, frame)
@@ -202,10 +219,6 @@ def draw(canvas):
 
     center_row = int(round((max_row - min_row) / 2))
     center_col = int(round((max_col - min_col) / 2))
-
-    coroutines.append(
-        fire(canvas, center_row, center_col)
-    )
 
     ship_frames = get_frames('./ship')
     coroutines.append(
