@@ -38,6 +38,21 @@ def get_playground_limits(canvas):
     return min_row, min_col, max_row, max_col
 
 
+def show_game_over(canvas):
+    frame = get_frames('./gameover')[0]
+    rows, cols = get_frame_size(frame)
+
+    min_row, min_col, max_row, max_col = get_playground_limits(canvas)
+
+    width = max_col - min_col
+    height = max_row - min_row
+
+    frame_row = round((height - rows) / 2) + min_row
+    frame_col = round((width - cols) / 2) + min_col
+
+    draw_frame(canvas, frame_row, frame_col, frame)
+
+
 async def sleep(tics=1):
     for _ in range(tics):
         await asyncio.sleep(0)
@@ -101,7 +116,6 @@ async def run_spaceship(canvas, row, column, frames):
     row_speed = column_speed = 0
     shoot_top = -1
     shoot_left = 2
-
     shoot_base_row_speed = - .3
     while True:
         rows_direction, columns_direction, space_pressed = read_controls(canvas)
