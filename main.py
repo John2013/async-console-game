@@ -12,6 +12,7 @@ from physics import update_speed
 coroutines: List[Coroutine] = []
 spaceship_frame_number = 0
 obstacles: List[Obstacle] = []
+obstacles_in_last_collision: List[Obstacle] = []
 
 
 def run_coroutines(coroutines: List[Coroutine], canvas, tic_timeout=0.):
@@ -84,6 +85,7 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
     while min_row < row < max_row and min_col < column < max_col:
         for obstacle in obstacles:
             if obstacle.has_collision(row, column):
+                obstacles_in_last_collision.append(obstacle)
                 return
 
         canvas.addstr(round(row), round(column), symbol)
@@ -169,6 +171,10 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
         row += speed
         if row > max_row:
             obstacles.remove(obstacle)
+        if obstacle in obstacles_in_last_collision:
+            obstacles.remove(obstacle)
+            obstacles_in_last_collision.remove(obstacle)
+            return
 
 
 async def fill_orbit_with_garbage(canvas, tics_timeout: int = 5):
