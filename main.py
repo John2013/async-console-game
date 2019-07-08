@@ -164,11 +164,6 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
     obstacles.append(obstacle)
 
     while row < max_row:
-        obstacle.row = row
-        draw_frame(canvas, row, column, garbage_frame)
-        await asyncio.sleep(0)
-        draw_frame(canvas, row, column, garbage_frame, negative=True)
-        row += speed
         if row > max_row:
             obstacles.remove(obstacle)
         if obstacle in obstacles_in_last_collision:
@@ -176,6 +171,11 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
             obstacles_in_last_collision.remove(obstacle)
             del obstacle
             return
+        obstacle.row = row
+        draw_frame(canvas, row, column, garbage_frame)
+        await asyncio.sleep(0)
+        draw_frame(canvas, row, column, garbage_frame, negative=True)
+        row += speed
 
 
 async def fill_orbit_with_garbage(canvas, tics_timeout: int = 5):
