@@ -6,7 +6,7 @@ from random import randint, choice
 from typing import List, Coroutine
 
 from curses_tools import draw_frame, read_controls, get_frame_size
-from obstacles import Obstacle, show_obstacles
+from obstacles import Obstacle
 from physics import update_speed
 
 coroutines: List[Coroutine] = []
@@ -82,6 +82,10 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
     curses.beep()
 
     while min_row < row < max_row and min_col < column < max_col:
+        for obstacle in obstacles:
+            if obstacle.has_collision(row, column):
+                return
+
         canvas.addstr(round(row), round(column), symbol)
         await asyncio.sleep(0)
         canvas.addstr(round(row), round(column), ' ')
@@ -237,8 +241,6 @@ def draw(canvas):
     )
 
     coroutines.append(fill_orbit_with_garbage(canvas))
-
-    coroutines.append(show_obstacles(canvas, obstacles))
 
     tic_timeout = .1
     run_coroutines(coroutines, canvas, tic_timeout)
