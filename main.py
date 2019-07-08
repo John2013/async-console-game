@@ -24,7 +24,7 @@ def run_coroutines(coroutines: List[Coroutine], canvas, tic_timeout=0.):
         time.sleep(tic_timeout)
 
 
-def get_playground_border(canvas):
+def get_playground_limits(canvas):
     min_row, min_col = (1, 1)
     max_row, max_col = canvas.getmaxyx()
     canvas_padding = 2
@@ -74,7 +74,7 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
 
     symbol = '-' if columns_speed else '|'
 
-    min_row, min_col, max_row, max_col = get_playground_border(canvas)
+    min_row, min_col, max_row, max_col = get_playground_limits(canvas)
 
     curses.beep()
 
@@ -87,7 +87,7 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
 
 
 async def run_spaceship(canvas, row, column, frames):
-    min_row, min_col, max_row, max_col = get_playground_border(canvas)
+    min_row, min_col, max_row, max_col = get_playground_limits(canvas)
 
     while True:
         rows_direction, columns_direction, space_pressed = read_controls(canvas)
@@ -125,7 +125,7 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
     Animate garbage, flying from top to bottom.
     Column position will stay same, as specified on start.
     """
-    min_row, min_col, max_row, max_col = get_playground_border(canvas)
+    min_row, min_col, max_row, max_col = get_playground_limits(canvas)
 
     column = max(column, min_col)
     column = min(column, max_col)
@@ -142,7 +142,7 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
 async def fill_orbit_with_garbage(canvas, tics_timeout: int = 5):
     garbage_frames = get_frames('./garbage')
 
-    min_row, min_col, max_row, max_col = get_playground_border(canvas)
+    min_row, min_col, max_row, max_col = get_playground_limits(canvas)
 
     while True:
         column = randint(min_col, max_col)
@@ -174,7 +174,7 @@ def draw(canvas):
     canvas.nodelay(True)
     canvas.refresh()
 
-    min_row, min_col, max_row, max_col = get_playground_border(canvas)
+    min_row, min_col, max_row, max_col = get_playground_limits(canvas)
 
     symbols = list('+*.:')
 
