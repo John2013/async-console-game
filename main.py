@@ -149,6 +149,10 @@ async def run_spaceship(canvas, row, column, frames):
                     shoot_row_speed
                 )
             )
+        for obstacle in obstacles:
+            if obstacle.has_collision(row, column, rows, cols):
+                show_game_over(canvas)
+                return
 
         frame = frames[spaceship_frame_number]
         draw_frame(canvas, row, column, frame)
