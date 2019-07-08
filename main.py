@@ -6,6 +6,7 @@ from random import randint, choice
 from typing import List, Coroutine
 
 from curses_tools import draw_frame, read_controls, get_frame_size
+from physics import update_speed
 
 coroutines: List[Coroutine] = []
 spaceship_frame_number = 0
@@ -88,11 +89,13 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
 
 async def run_spaceship(canvas, row, column, frames):
     min_row, min_col, max_row, max_col = get_playground_limits(canvas)
-
+    row_speed = column_speed = 0
     while True:
         rows_direction, columns_direction, space_pressed = read_controls(canvas)
-        row += rows_direction
-        column += columns_direction
+        row_speed, column_speed = update_speed(row_speed, column_speed, rows_direction,
+                                               columns_direction)
+        row += row_speed
+        column += column_speed
 
         if row < min_row:
             row += 1
