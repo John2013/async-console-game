@@ -6,10 +6,12 @@ from random import randint, choice
 from typing import List, Coroutine
 
 from curses_tools import draw_frame, read_controls, get_frame_size
+from obstacles import Obstacle, show_obstacles
 from physics import update_speed
 
 coroutines: List[Coroutine] = []
 spaceship_frame_number = 0
+obstacles: List[Obstacle] = []
 
 
 def run_coroutines(coroutines: List[Coroutine], canvas, tic_timeout=0.):
@@ -152,11 +154,17 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
 
     row = min_row
 
+    obstacle = Obstacle(row, column, *get_frame_size(garbage_frame))
+    obstacles.append(obstacle)
+
     while row < max_row:
+        obstacle.row = row
         draw_frame(canvas, row, column, garbage_frame)
         await asyncio.sleep(0)
         draw_frame(canvas, row, column, garbage_frame, negative=True)
         row += speed
+        if row > max_row:
+            obstacles.remove(obstacle)
 
 
 async def fill_orbit_with_garbage(canvas, tics_timeout: int = 5):
@@ -229,6 +237,8 @@ def draw(canvas):
     )
 
     coroutines.append(fill_orbit_with_garbage(canvas))
+
+    coroutines.append(show_obstacles(canvas, obstacles))
 
     tic_timeout = .1
     run_coroutines(coroutines, canvas, tic_timeout)
