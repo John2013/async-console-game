@@ -8,6 +8,7 @@ from typing import List, Coroutine
 from curses_tools import draw_frame, read_controls, get_frame_size
 
 coroutines: List[Coroutine] = []
+spaceship_frame_number = 0
 
 
 def run_coroutines(coroutines: List[Coroutine], canvas, tic_timeout=0.):
@@ -85,30 +86,38 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
         column += columns_speed
 
 
-async def ship(canvas, row, column, frames):
+async def run_spaceship(canvas, row, column, frames):
     min_row, min_col, max_row, max_col = get_playground_border(canvas)
+
     while True:
-        for frame in frames:
-            rows_direction, columns_direction, space_pressed = read_controls(canvas)
-            row += rows_direction
-            column += columns_direction
+        rows_direction, columns_direction, space_pressed = read_controls(canvas)
+        row += rows_direction
+        column += columns_direction
 
-            if row < min_row:
-                row += 1
-            if column < min_col:
-                column += 1
+        if row < min_row:
+            row += 1
+        if column < min_col:
+            column += 1
 
-            rows, cols = get_frame_size(frame)
+        rows, cols = get_frame_size(frames[spaceship_frame_number])
 
-            if row + rows > max_row:
-                row -= 1
+        if row + rows > max_row:
+            row -= 1
 
-            if column + cols > max_col:
-                column -= 1
+        if column + cols > max_col:
+            column -= 1
 
-            draw_frame(canvas, row, column, frame)
-            await asyncio.sleep(0)
-            draw_frame(canvas, row, column, frame, negative=True)
+        frame = frames[spaceship_frame_number]
+        draw_frame(canvas, row, column, frame)
+        await asyncio.sleep(0)
+        draw_frame(canvas, row, column, frame, negative=True)
+
+
+async def animate_spaceship(frames):
+    global spaceship_frame_number
+    while True:
+        spaceship_frame_number = (spaceship_frame_number + 1) % len(frames)
+        await sleep(2)
 
 
 async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
@@ -197,7 +206,10 @@ def draw(canvas):
 
     ship_frames = get_frames('./ship')
     coroutines.append(
-        ship(canvas, center_row - 1, center_col - 2, ship_frames)
+        run_spaceship(canvas, center_row - 1, center_col - 2, ship_frames)
+    )
+    coroutines.append(
+        animate_spaceship(ship_frames)
     )
 
     coroutines.append(fill_orbit_with_garbage(canvas))
