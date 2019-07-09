@@ -29,12 +29,13 @@ def run_coroutines(coroutines: List[Coroutine], canvas, tic_timeout=0.):
         time.sleep(tic_timeout)
 
 
-def get_playground_limits(canvas):
-    min_row, min_col = (1, 1)
+def get_playground_limits(canvas, with_border=True):
+    min_row, min_col = (1, 1) if with_border else (0, 0)
     max_row, max_col = canvas.getmaxyx()
     canvas_padding = 2
-    max_row -= canvas_padding
-    max_col -= canvas_padding
+    if with_border:
+        max_row -= canvas_padding
+        max_col -= canvas_padding
     return min_row, min_col, max_row, max_col
 
 
@@ -232,11 +233,17 @@ def get_random_coords(min_row, max_row, min_col, max_col):
     )
 
 
-def draw(canvas):
+def draw(window):
     curses.curs_set(False)
+    min_row, min_col, max_row, max_col = get_playground_limits(window, False)
+    canvas_rows = max_row - 1
+    canvas = window.derwin(canvas_rows, max_col, 0, 0)
+    status_bar = window.derwin(1, max_col, canvas_rows, 0)
     canvas.border()
     canvas.nodelay(True)
     canvas.refresh()
+    status_bar.addstr('status bar')
+    status_bar.refresh()
 
     min_row, min_col, max_row, max_col = get_playground_limits(canvas)
 
