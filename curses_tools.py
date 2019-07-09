@@ -5,14 +5,14 @@ UP_KEY_CODE = 259
 DOWN_KEY_CODE = 258
 
 
-def read_controls(canvas):
+def read_controls(window):
     """Read keys pressed and returns tuple witl controls state."""
 
     rows_direction = columns_direction = 0
     space_pressed = False
 
     while True:
-        pressed_key_code = canvas.getch()
+        pressed_key_code = window.getch()
 
         if pressed_key_code == -1:
             # https://docs.python.org/3/library/curses.html#curses.window.getch
