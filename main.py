@@ -7,6 +7,7 @@ from typing import List, Coroutine
 
 from curses_tools import draw_frame, read_controls, get_frame_size
 from explosion import explode
+from game_scenario import get_garbage_delay_tics, PHRASES
 from obstacles import Obstacle
 from physics import update_speed
 
@@ -14,9 +15,13 @@ coroutines: List[Coroutine] = []
 spaceship_frame_number = 0
 obstacles: List[Obstacle] = []
 obstacles_in_last_collision: List[Obstacle] = []
+year = 1957
 
 
-def run_coroutines(coroutines: List[Coroutine], canvas, tic_timeout=0.):
+def run_coroutines(coroutines: List[Coroutine], playground, status_bar, tic_timeout=0.,
+                   tics_per_year=10):
+    global year
+    years_per_tic = 1 / tics_per_year
     while True:
         for coroutine in coroutines:
             try:
@@ -25,8 +30,10 @@ def run_coroutines(coroutines: List[Coroutine], canvas, tic_timeout=0.):
                 coroutines.remove(coroutine)
         if len(coroutines) == 0:
             break
-        canvas.refresh()
+        playground.refresh()
+        status_bar.refresh()
         time.sleep(tic_timeout)
+        year += years_per_tic
 
 
 def get_playground_limits(playground, with_border=True):
@@ -204,17 +211,42 @@ async def fly_garbage(playground, column, garbage_frame, speed=0.5):
         row += speed
 
 
-async def fill_orbit_with_garbage(playground, tics_timeout: int = 5):
+async def fill_orbit_with_garbage(playground):
     garbage_frames = get_frames('./garbage')
 
     min_row, min_col, max_row, max_col = get_playground_limits(playground)
 
     while True:
+        tics_timeout = get_garbage_delay_tics(year)
+        if not tics_timeout:
+            await asyncio.sleep(0)
+            continue
+
         column = randint(min_col, max_col)
         frame = choice(garbage_frames)
 
         coroutines.append(fly_garbage(playground, column, frame))
         await sleep(tics_timeout)
+
+
+async def show_year(status_bar):
+    current_phrase = ""
+    phrases_years = list(PHRASES.keys())
+    phrases_years.sort(reverse=True)
+    _, cols = status_bar.getmaxyx()
+
+    while True:
+        for phrase_year in phrases_years:
+            if phrase_year <= year:
+                current_phrase = PHRASES[phrase_year]
+                break
+
+        status = "{} - {}".format(int(year), current_phrase)
+
+        status_col = round((cols - len(status)) / 2)
+        draw_frame(status_bar, 0, status_col, status, padding=0)
+        await asyncio.sleep(0)
+        draw_frame(status_bar, 0, status_col, status, negative=True, padding=0)
 
 
 def get_frames(path):
@@ -242,9 +274,8 @@ def draw(canvas):
     playground.border()
     canvas.nodelay(True)
     playground.nodelay(True)
-    canvas.refresh()
+    status_bar.nodelay(True)
     playground.refresh()
-    status_bar.addstr('status bar')
     status_bar.refresh()
 
     min_row, min_col, max_row, max_col = get_playground_limits(playground)
@@ -283,8 +314,10 @@ def draw(canvas):
 
     coroutines.append(fill_orbit_with_garbage(playground))
 
+    coroutines.append(show_year(status_bar))
+
     tic_timeout = .1
-    run_coroutines(coroutines, playground, tic_timeout)
+    run_coroutines(coroutines, playground, status_bar, tic_timeout)
 
 
 if __name__ == '__main__':

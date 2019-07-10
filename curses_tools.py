@@ -36,7 +36,7 @@ def read_controls(window):
     return rows_direction, columns_direction, space_pressed
 
 
-def draw_frame(canvas, start_row, start_column, text, negative=False):
+def draw_frame(canvas, start_row, start_column, text, negative=False, padding=1):
     """
     Draw multiline text fragment on canvas.
 
@@ -45,7 +45,6 @@ def draw_frame(canvas, start_row, start_column, text, negative=False):
 
     rows_number, columns_number = canvas.getmaxyx()
 
-    padding = 1
     rows_number -= padding
     columns_number -= padding
 
