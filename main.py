@@ -127,6 +127,8 @@ async def run_spaceship(playground, row, column, frames, canvas):
     shoot_top = -1
     shoot_left = 2
     shoot_base_row_speed = - .3
+
+    year_to_enable_plasma_gun = 2020
     while True:
         rows_direction, columns_direction, space_pressed = read_controls(canvas)
         row_speed, column_speed = update_speed(row_speed, column_speed, rows_direction,
@@ -147,7 +149,7 @@ async def run_spaceship(playground, row, column, frames, canvas):
         if column + cols > max_col:
             column -= 1
 
-        if space_pressed:
+        if space_pressed and year >= year_to_enable_plasma_gun:
             shoot_row_speed = shoot_base_row_speed
             if row_speed < 0:
                 shoot_row_speed += row_speed
