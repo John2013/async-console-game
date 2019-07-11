@@ -23,6 +23,8 @@
 python3 main.py
 ```
 
+Или запустите на [repl.it](https://repl.it/@naWashington/async-console-game)
+
 ## Для чего
 
 Для обучения на сайте https://dvmn.org
