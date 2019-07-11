@@ -198,8 +198,6 @@ async def fly_garbage(playground, column, garbage_frame, speed=0.5):
     center_col = round(cols / 2)
 
     while row < max_row:
-        if row > max_row:
-            obstacles.remove(obstacle)
         if obstacle in obstacles_in_last_collision:
             obstacles.remove(obstacle)
             obstacles_in_last_collision.remove(obstacle)
@@ -211,6 +209,8 @@ async def fly_garbage(playground, column, garbage_frame, speed=0.5):
         await asyncio.sleep(0)
         draw_frame(playground, row, column, garbage_frame, negative=True)
         row += speed
+    else:
+        obstacles.remove(obstacle)
 
 
 async def fill_orbit_with_garbage(playground):
