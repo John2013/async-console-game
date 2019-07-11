@@ -137,17 +137,17 @@ async def run_spaceship(playground, row, column, frames, canvas):
         column += column_speed
 
         if row < min_row:
-            row += 1
+            row = min_row
         if column < min_col:
-            column += 1
+            column = min_col
 
         rows, cols = get_frame_size(frames[spaceship_frame_number])
 
-        if row + rows > max_row:
-            row -= 1
+        if row + rows > max_row + 1:
+            row = max_row - rows + 1
 
-        if column + cols > max_col:
-            column -= 1
+        if column + cols > max_col + 1:
+            column = max_col - cols + 1
 
         if space_pressed and year >= year_to_enable_plasma_gun:
             shoot_row_speed = shoot_base_row_speed
