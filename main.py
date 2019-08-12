@@ -323,5 +323,8 @@ def draw(canvas):
 
 
 if __name__ == '__main__':
-    curses.update_lines_cols()
-    curses.wrapper(draw)
+    try:
+        curses.update_lines_cols()
+        curses.wrapper(draw)
+    except KeyboardInterrupt:
+        print('Good bye!')
